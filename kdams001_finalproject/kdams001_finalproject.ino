@@ -16,7 +16,7 @@ int yValue;
 // Shared Vars
 int joystickMovement = 0;
 bool select = false;
-
+bool cursorPosition = false;
 // EEPROM Helper Functions
 // reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
 
@@ -64,7 +64,7 @@ typedef struct task {
     
 } task;
 
-const unsigned short tasksNum = 3;
+const unsigned short tasksNum = 4;
 task tasks[tasksNum];
 
 // ------------------- Joy Stick Task --------------------------
@@ -214,6 +214,55 @@ int TickFct_JoyStick(int state)
 
   return state;
  }
+// --------- updateCursor task --------
+enum Update_Cursor_states {updateCursorStart, updateCursor};
+
+int TickFct_update_cursor(int state){
+// state transitions
+  switch(state){
+    case updateCursorStart:
+      cursorPosition = false;
+      // initial spot for cursor
+      lcd.setCursor(0,1);
+      lcd.write('>');
+      lcd.setCursor(0,1);
+      state = updateCursor; 
+      break;
+    case updateCursor:
+      state = updateCursor;
+      break;
+    default:
+      break;
+  }
+// state actions 
+  switch(state){
+    case updateCursorStart:
+      break;
+    case updateCursor:
+      if(joystickMovement == -1 && cursorPosition)
+      {
+        lcd.write(' ');
+        lcd.setCursor(0,1);
+        lcd.write('>');
+        lcd.setCursor(0,1);
+        cursorPosition = false;
+      }
+      else if(joystickMovement == 1 && !cursorPosition)
+      {
+        lcd.write(' ');
+        lcd.setCursor(8,1);
+        lcd.write('>');
+        lcd.setCursor(8,1);
+        cursorPosition = true;
+      }
+      break;
+    default:
+      break;
+  }
+
+  return state;
+}
+
 
 void setup() {
   // Task scheduler
@@ -227,6 +276,11 @@ void setup() {
   tasks[i].period = 100;
   tasks[i].elapsedTime = 0;
   tasks[i].TickFct = &TickFct_btn;
+  i++;
+  tasks[i].state = updateCursorStart;
+  tasks[i].period = 100;
+  tasks[i].elapsedTime = 0;
+  tasks[i].TickFct = &TickFct_update_cursor;
   i++;
   tasks[i].state = bzrStart;
   tasks[i].period = 100;
@@ -242,7 +296,6 @@ void setup() {
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   // Print a message to the LCD.
-  lcd.blink();
   lcd.write("testing");
   Serial.begin(9600);
   // samples of how to use EEPROM
