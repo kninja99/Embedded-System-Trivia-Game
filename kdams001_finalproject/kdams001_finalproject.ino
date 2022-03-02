@@ -1,7 +1,8 @@
 #include <LiquidCrystal.h>
+#include <Wire.h>
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-
+#define EEPROM_I2C_ADDRESS 0x50
 #define joyX A1
 #define joyY A0
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
@@ -13,7 +14,43 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 int xValue;
 int yValue;
 
+// EEPROM Helper Functions
 
+// for reading from the EEPROM
+void writeEEPROM(int address, byte val, int i2c_address) {
+  Wire.beginTransmission(i2c_address);
+
+  Wire.write((int)(address >> 8)); // Most significant bit
+  Wire.write((int)(address & 0xFF)); // Least significant bit
+
+  //sending data
+  Wire.write(val);
+
+  Wire.endTransmission();
+
+  //Add delay write
+  delay(5);
+}
+
+// for writing to eeprom
+byte readEEPROM(int address, int i2c_address) {
+  byte rcvData = 0xFF;
+  
+  Wire.beginTransmission(i2c_address);
+  
+  Wire.write((int)(address >> 8)); // Most significant bit
+  Wire.write((int)(address & 0xFF)); // Least significant bit
+
+  Wire.endTransmission();
+
+  Wire.requestFrom(i2c_address, 1);
+
+  rcvData = Wire.read();
+
+  return rcvData;
+}
+
+// ----- Start of Task ----
 
 typedef struct task {
   int state;
