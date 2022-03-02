@@ -1,6 +1,4 @@
 #include <LiquidCrystal.h>
-
-
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
 
@@ -9,6 +7,7 @@
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 const int sw = 6;
 const int a0 = 13;
+const int buzzpin = 10;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 // joystick var
 int xValue;
@@ -24,7 +23,7 @@ typedef struct task {
     
 } task;
 
-const unsigned short tasksNum = 2;
+const unsigned short tasksNum = 3;
 task tasks[tasksNum];
 
 // ------------------- Joy Stick Task --------------------------
@@ -130,8 +129,41 @@ int TickFct_JoyStick(int state)
     }
     return state;
   }
+// -------- Buzzer task (wirered right and working)---------------
+ enum Bzr_states {bzrStart , bzrOn, bzrOff};
 
- 
+ int TickFct_bzr(int state) {
+  // transitions
+  switch(state){
+    case bzrStart:
+      state = bzrOn;
+      break;
+    case bzrOn:
+      state = bzrOff;
+      break;
+    case bzrOff:
+      state = bzrOn;
+      break;
+    default:
+      break;
+  }
+//actions
+  switch(state){
+    case bzrStart:
+      break;
+    case bzrOn:
+      //digitalWrite(buzzpin, HIGH);
+      //Serial.println(digitalRead(buzzpin));
+      break;
+    case bzrOff:
+      //digitalWrite(buzzpin, LOW);
+      break;
+    default:
+      break;
+  }
+
+  return state;
+ }
 
 void setup() {
   // Task scheduler
@@ -145,9 +177,15 @@ void setup() {
   tasks[i].period = 100;
   tasks[i].elapsedTime = 0;
   tasks[i].TickFct = &TickFct_btn;
-  
+  i++;
+  tasks[i].state = bzrStart;
+  tasks[i].period = 100;
+  tasks[i].elapsedTime = 0;
+  tasks[i].TickFct = &TickFct_bzr;
+
   // pin setup
   pinMode(13, INPUT);
+  pinMode(buzzpin, OUTPUT);
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   // Print a message to the LCD.
