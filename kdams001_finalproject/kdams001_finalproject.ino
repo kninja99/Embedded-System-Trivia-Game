@@ -15,6 +15,7 @@ int xValue;
 int yValue;
 
 // EEPROM Helper Functions
+// reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
 
 // for reading from the EEPROM
 void writeEEPROM(int address, byte val, int i2c_address) {
@@ -220,6 +221,9 @@ void setup() {
   tasks[i].elapsedTime = 0;
   tasks[i].TickFct = &TickFct_bzr;
 
+  //EEPROM Setup
+  Wire.begin();
+
   // pin setup
   pinMode(13, INPUT);
   pinMode(buzzpin, OUTPUT);
@@ -229,6 +233,11 @@ void setup() {
   lcd.blink();
   lcd.write("testing");
   Serial.begin(9600);
+
+  //writeEEPROM(100, 35, EEPROM_I2C_ADDRESS);
+
+  Serial.println(readEEPROM(100, EEPROM_I2C_ADDRESS));
+  
 }
 
 void loop() {
