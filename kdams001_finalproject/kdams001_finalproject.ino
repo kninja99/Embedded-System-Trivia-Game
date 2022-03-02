@@ -13,6 +13,8 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 // joystick var
 int xValue;
 int yValue;
+// Shared Vars
+int joystickMovement = 0;
 
 // EEPROM Helper Functions
 // reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
@@ -51,7 +53,7 @@ byte readEEPROM(int address, int i2c_address) {
   return rcvData;
 }
 
-// ----- Start of Task ----
+// ----- Start of Tasks ----
 
 typedef struct task {
   int state;
@@ -71,19 +73,23 @@ int TickFct_JoyStick(int state)
   //Read thing
     switch(state){ // State transitions
       case joyStart:
-        xValue = analogRead(joyX);
-        //yValue = analogRead(joyY);
-        xValue= map(xValue, 0, 1023, 0 , 3);
+        joystickMovement = 0;
         state = checkDirection;
         break;
       case checkDirection:
         if(xValue > 1)
         {
+          joystickMovement = -1;
           state =left;
         }
         else if(xValue < 1)
         {
+          joystickMovement = 1;
           state = right;
+        }
+        else if(xValue == 1)
+        {
+          joystickMovement = 0;
         }
         else {
           state = checkDirection;
@@ -108,7 +114,7 @@ int TickFct_JoyStick(int state)
         xValue = analogRead(joyX);
         //yValue = analogRead(joyY);
         xValue= map(xValue, 0, 1023, 0 , 3);
-        //Serial.println(xValue);
+        Serial.println(joystickMovement);
         break;
       case left:
         break;
@@ -233,10 +239,9 @@ void setup() {
   lcd.blink();
   lcd.write("testing");
   Serial.begin(9600);
-
+  // samples of how to use EEPROM
   //writeEEPROM(100, 35, EEPROM_I2C_ADDRESS);
-
-  Serial.println(readEEPROM(100, EEPROM_I2C_ADDRESS));
+  //Serial.println(readEEPROM(100, EEPROM_I2C_ADDRESS));
   
 }
 
