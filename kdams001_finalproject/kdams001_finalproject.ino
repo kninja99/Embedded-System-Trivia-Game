@@ -15,6 +15,7 @@ int xValue;
 int yValue;
 // Shared Vars
 int joystickMovement = 0;
+bool select = false;
 
 // EEPROM Helper Functions
 // reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
@@ -96,11 +97,11 @@ int TickFct_JoyStick(int state)
         }
         break;
       case left:
-        Serial.println("joystick is moved left");
+        //Serial.println("joystick is moved left");
         state = checkDirection;
         break;
       case right:
-        Serial.println("joystick is moved right");
+        //Serial.println("joystick is moved right");
         state = checkDirection;
         break;
       default:
@@ -114,7 +115,6 @@ int TickFct_JoyStick(int state)
         xValue = analogRead(joyX);
         //yValue = analogRead(joyY);
         xValue= map(xValue, 0, 1023, 0 , 3);
-        Serial.println(joystickMovement);
         break;
       case left:
         break;
@@ -135,6 +135,7 @@ int TickFct_JoyStick(int state)
     switch(state)
     {
       case btnStart:
+        select = false;
         state = released;
         break;
       case released:
@@ -143,6 +144,7 @@ int TickFct_JoyStick(int state)
           state = pressed;
         }
         else if(!digitalRead(a0)){
+          select = false;
           state = released;
         }
         break;
@@ -152,7 +154,7 @@ int TickFct_JoyStick(int state)
           state = pressed;
         }
         else if(!digitalRead(a0)){
-          Serial.println("btn was pressed");
+          select = true;
           state = released;
         }
         break;
@@ -165,6 +167,10 @@ int TickFct_JoyStick(int state)
       case btnStart:
         break;
       case released:
+        if(select)
+        {
+          Serial.println("select btn pressed");
+        }
         break;
       case pressed:
         break;
