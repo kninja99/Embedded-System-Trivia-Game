@@ -17,6 +17,8 @@ int yValue;
 int joystickMovement = 0;
 bool select = false;
 bool cursorPosition = false;
+bool timerOn = false;
+int count = 0;
 // EEPROM Helper Functions
 // reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
 
@@ -64,7 +66,7 @@ typedef struct task {
     
 } task;
 
-const unsigned short tasksNum = 4;
+const unsigned short tasksNum = 5;
 task tasks[tasksNum];
 
 // ------------------- Joy Stick Task --------------------------
@@ -262,6 +264,77 @@ int TickFct_update_cursor(int state){
 
   return state;
 }
+// ------------- timer task ------------------
+enum Timer_states {timerStart, timer_off, timer_on};
+
+int TickFct_timer(int state){
+// transitions
+  static int i;
+  switch(state)
+  {
+    case timerStart:
+      i = 0;
+      state = timer_off;
+      break;
+    case timer_off:
+      if(timerOn)
+      {
+        state = timer_on;
+      }
+      else if(!timerOn)
+      {
+        state = timer_off;
+      }
+      else {
+        state = timer_off;
+      }
+      break;
+    case timer_on:
+      if(timerOn)
+      {
+        state = timer_on;
+      }
+      else if(!timerOn)
+      {
+        i = 0;
+        state = timer_off;
+      }
+      else {
+        state = timer_on;
+      }
+      break;
+    default:
+      break;
+  }
+// actions
+  switch(state)
+  {
+    case timerStart:
+      break;
+    case timer_off:
+      count = 0;
+      break;
+    case timer_on:
+      // increment count ever 1000ms
+      if(i >= 10)
+      {
+        count++;
+        i = 0;
+        Serial.println(count);
+      }
+      // keeps count max at 10
+      if(count < 10)
+      {
+        i++;
+      }
+      break;
+    default:
+      break;
+  }
+
+
+  return state;
+}
 
 
 void setup() {
@@ -281,6 +354,11 @@ void setup() {
   tasks[i].period = 100;
   tasks[i].elapsedTime = 0;
   tasks[i].TickFct = &TickFct_update_cursor;
+  i++;
+  tasks[i].state = timerStart;
+  tasks[i].period = 100;
+  tasks[i].elapsedTime = 0;
+  tasks[i].TickFct = &TickFct_timer;
   i++;
   tasks[i].state = bzrStart;
   tasks[i].period = 100;
