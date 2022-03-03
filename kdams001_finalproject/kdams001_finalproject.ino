@@ -22,8 +22,8 @@ int count = 0;
 bool buzzerOn = false;
 bool atMenu = true;
 bool blockCursor = false;
-String questionArr[] = {"5*4 = 20", "1270 % 3 = 0"};
-bool answerArr[] = {true, false};
+String questionArr[] = {"5*4 = 20", "1270 % 3 = 0", "7 + 4 = 12  ", "8 / 2 = 4 ", "25 % 5 = 0  "};
+bool answerArr[] = {true, false, false, true, true};
 
 // EEPROM Helper Functions
 // reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
@@ -399,7 +399,7 @@ int TickFct_gameLoop(int state){
       }
       break;
     case gameplay:
-      if(questionNum >= 2)
+      if(questionNum >= 5)
       {
         timerOn = false;
         blockCursor = true;
@@ -499,7 +499,7 @@ int TickFct_gameLoop(int state){
       break;
     case gameplay:
     //display logic
-      if(questionNum < 2)
+      if(questionNum < 5)
       {
         lcd.setCursor(0,0);
         lcd.print(questionArr[questionNum]);
