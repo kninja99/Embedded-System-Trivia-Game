@@ -362,12 +362,13 @@ int TickFct_timer(int state){
   return state;
 }
 // -------------- Game State -------------------
-enum Game_Loop_states {gameStart, menu, gameplay, loser, checkAnswer, winer };
+enum Game_Loop_states {gameStart, menu, gameplay, loser, checkAnswer, winner };
 
 int TickFct_gameLoop(int state){
   static int i;
   static int questionNum;
   static int wins;
+  // state transitions
   switch(state){
     case gameStart:
       // reading from EEProm
@@ -398,7 +399,13 @@ int TickFct_gameLoop(int state){
       }
       break;
     case gameplay:
-      if(!select && count < 10)
+      if(questionNum >= 2)
+      {
+        Serial.println("winner");
+        timerOn = false;
+        state = winner;
+      }
+      else if(!select && count < 10)
       {
         state = gameplay;
       }
@@ -412,6 +419,9 @@ int TickFct_gameLoop(int state){
       {
         timerOn = false;
         state = checkAnswer;
+      }
+      else {
+        state = gameplay;
       }
       break;
     case loser:
@@ -436,29 +446,32 @@ int TickFct_gameLoop(int state){
       }
       break;
     case checkAnswer:
-      if(!answerArr[questionNum])
+      if(answerArr[questionNum] != cursorPosition)
       {
         lcd.clear();
         state = loser;
       }
-      else if(answerArr[questionNum])
+      else if(answerArr[questionNum] == cursorPosition)
       {
         //answer correct
         timerOn = true;
-        questionNum++;
+        questionNum += 1;
         state = gameplay;
       }
       else {
         state = checkAnswer;
       }
       break;
+    case winner:
+      state = winner;
+      break;
     default:
       state = gameStart;
+      break;
   }
-
+// state actions 
   switch(state){
     case gameStart:
-      
       break;
     case menu:
       lcd.setCursor(0,0);
@@ -471,11 +484,14 @@ int TickFct_gameLoop(int state){
       break;
     case gameplay:
     //display logic
-      lcd.setCursor(0,0);
-      lcd.print(questionArr[questionNum]);
-      lcd.setCursor(14,0);
-      lcd.print(10 - count);
-      lcd.print(" ");
+      if(questionNum < 2)
+      {
+        lcd.setCursor(0,0);
+        lcd.print(questionArr[questionNum]);
+        lcd.setCursor(14,0);
+        lcd.print(10 - count);
+        lcd.print(" "); 
+      }
       break;
     case loser:
       // buzzer logic
@@ -496,6 +512,9 @@ int TickFct_gameLoop(int state){
       break;
     case checkAnswer:
       Serial.println("checking answer");
+      break;
+    case winner:
+      Serial.println("you have won, eeprom should increment by one");
       break;
     default:
       break;
