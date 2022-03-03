@@ -361,13 +361,16 @@ int TickFct_timer(int state){
   return state;
 }
 // -------------- Game State -------------------
-enum Game_Loop_states {gameStart, menu, gameplay};
+enum Game_Loop_states {gameStart, menu, gameplay, loser, checkAnswer };
 
 int TickFct_gameLoop(int state){
   static int i;
   static int questionNum;
+  static int wins;
   switch(state){
     case gameStart:
+      // reading from EEProm
+      wins = readEEPROM(100, EEPROM_I2C_ADDRESS);
       // i used for tick counts 
       i = 0;
       // used to keep track what question we are on
@@ -382,16 +385,37 @@ int TickFct_gameLoop(int state){
       else if(select)
       {
         lcd.clear();
-        // resetting cursor after clearing the screen
+        // resetting cursor after clearing the screen and writing a gui that doesn't change
         lcd.setCursor(0,1);
-        lcd.write('>');
+        lcd.write(">False");
+        lcd.setCursor(9,1);
+        lcd.write("True");
         // leaves the menu
         atMenu = false;
+        timerOn = true;
         state = gameplay;
       }
       break;
     case gameplay:
-      state = gameplay;
+      if(!select && count < 10)
+      {
+        state = gameplay;
+      }
+      else if(count > 10){
+        timerOn = false;
+        state = loser;
+      }
+      else if(select)
+      {
+        timerOn = false;
+        state = checkAnswer;
+      }
+      break;
+    case loser:
+      state = loser;
+      break;
+    case checkAnswer:
+      state = checkAnswer;
       break;
     default:
       state = gameStart;
@@ -402,15 +426,27 @@ int TickFct_gameLoop(int state){
       
       break;
     case menu:
-      Serial.println("at menu");
       lcd.setCursor(0,0);
       lcd.write("Start Menu");
       lcd.setCursor(1,1);
       lcd.write("Begin");
+      lcd.setCursor(8,1);
+      lcd.write("Wins:");
+      lcd.print(wins);
       break;
     case gameplay:
+    //display logic
       lcd.setCursor(0,0);
-      lcd.write("Game playing");
+      lcd.print(questionArr[questionNum]);
+      lcd.setCursor(14,0);
+      lcd.print(10 - count);
+      lcd.print(" ");
+      break;
+    case loser:
+      Serial.println("you lose");
+      break;
+    case checkAnswer:
+      Serial.println("checking answer");
       break;
     default:
       break;
