@@ -341,14 +341,14 @@ int TickFct_timer(int state){
       break;
     case timer_on:
       // increment count ever 1000ms
-      if(i >= 10)
+      if(i > 10)
       {
         count++;
         i = 0;
         Serial.println(count);
       }
       // keeps count max at 10
-      if(count < 10)
+      if(count <= 10)
       {
         i++;
       }
@@ -404,6 +404,7 @@ int TickFct_gameLoop(int state){
       else if(count > 10){
         timerOn = false;
         state = loser;
+        lcd.clear();
       }
       else if(select)
       {
@@ -412,7 +413,22 @@ int TickFct_gameLoop(int state){
       }
       break;
     case loser:
-      state = loser;
+    // stay in loser state for 3 sec
+      if(i < 30)
+      {
+        state = loser;
+      }
+      else if(i >= 30)
+      {
+        i = 0;
+        // reset cursor
+        lcd.setCursor(0,1);
+        lcd.write(">");
+        state = menu;
+      }
+      else {
+        state = loser;
+      }
       break;
     case checkAnswer:
       state = checkAnswer;
@@ -443,7 +459,21 @@ int TickFct_gameLoop(int state){
       lcd.print(" ");
       break;
     case loser:
-      Serial.println("you lose");
+      // buzzer logic
+      if(i < 5)
+      {
+        buzzerOn = true;
+      }
+      else {
+        buzzerOn = false;
+      }
+      // loser display
+      if(i < 30)
+      {
+        lcd.setCursor(0,0);
+        lcd.write("You Lose");
+      }
+      i++;
       break;
     case checkAnswer:
       Serial.println("checking answer");
