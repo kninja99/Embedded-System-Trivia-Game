@@ -71,7 +71,7 @@ typedef struct task {
     
 } task;
 
-const unsigned short tasksNum = 5;
+const unsigned short tasksNum = 6;
 task tasks[tasksNum];
 
 // ------------------- Joy Stick Task --------------------------
@@ -266,14 +266,16 @@ int TickFct_update_cursor(int state){
     case updateCursor:
       if(joystickMovement == -1 && cursorPosition)
       {
+        lcd.setCursor(8,1);
         lcd.write(' ');
         lcd.setCursor(0,1);
         lcd.write('>');
         lcd.setCursor(0,1);
         cursorPosition = false;
       }
-      else if(joystickMovement == 1 && !cursorPosition)
+      else if(joystickMovement == 1 && !cursorPosition && !atMenu)
       {
+        lcd.setCursor(0,1);
         lcd.write(' ');
         lcd.setCursor(8,1);
         lcd.write('>');
@@ -358,7 +360,63 @@ int TickFct_timer(int state){
 
   return state;
 }
+// -------------- Game State -------------------
+enum Game_Loop_states {gameStart, menu, gameplay};
 
+int TickFct_gameLoop(int state){
+  static int i;
+  static int questionNum;
+  switch(state){
+    case gameStart:
+      // i used for tick counts 
+      i = 0;
+      // used to keep track what question we are on
+      questionNum = 0;
+      state = menu;
+      break;
+    case menu:
+      if(!select)
+      {
+        state = menu;
+      }
+      else if(select)
+      {
+        lcd.clear();
+        // resetting cursor after clearing the screen
+        lcd.setCursor(0,1);
+        lcd.write('>');
+        // leaves the menu
+        atMenu = false;
+        state = gameplay;
+      }
+      break;
+    case gameplay:
+      state = gameplay;
+      break;
+    default:
+      state = gameStart;
+  }
+
+  switch(state){
+    case gameStart:
+      
+      break;
+    case menu:
+      Serial.println("at menu");
+      lcd.setCursor(0,0);
+      lcd.write("Start Menu");
+      lcd.setCursor(1,1);
+      lcd.write("Begin");
+      break;
+    case gameplay:
+      lcd.setCursor(0,0);
+      lcd.write("Game playing");
+      break;
+    default:
+      break;
+  }
+  return state;
+}
 
 void setup() {
   // Task scheduler
@@ -382,6 +440,11 @@ void setup() {
   tasks[i].period = 100;
   tasks[i].elapsedTime = 0;
   tasks[i].TickFct = &TickFct_timer;
+  i++;
+  tasks[i].state = gameStart;
+  tasks[i].period = 100;
+  tasks[i].elapsedTime = 0;
+  tasks[i].TickFct = &TickFct_gameLoop;
   i++;
   tasks[i].state = bzrStart;
   tasks[i].period = 100;
