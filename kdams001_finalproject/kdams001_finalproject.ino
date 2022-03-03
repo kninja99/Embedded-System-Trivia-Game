@@ -20,6 +20,10 @@ bool cursorPosition = false;
 bool timerOn = false;
 int count = 0;
 bool buzzerOn = false;
+bool atMenu = true;
+String questionArr[] = {"5*4 = 20", "1270 % 3 = 0"};
+bool answerArr[] = {true, false};
+
 // EEPROM Helper Functions
 // reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
 
