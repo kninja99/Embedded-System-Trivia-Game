@@ -362,7 +362,7 @@ int TickFct_timer(int state){
   return state;
 }
 // -------------- Game State -------------------
-enum Game_Loop_states {gameStart, menu, gameplay, loser, checkAnswer };
+enum Game_Loop_states {gameStart, menu, gameplay, loser, checkAnswer, winer };
 
 int TickFct_gameLoop(int state){
   static int i;
@@ -426,6 +426,7 @@ int TickFct_gameLoop(int state){
         // reset cursor
         lcd.setCursor(0,1);
         lcd.write(">");
+        questionNum = 0;
         atMenu = true;
         blockCursor = false;
         state = menu;
@@ -435,7 +436,21 @@ int TickFct_gameLoop(int state){
       }
       break;
     case checkAnswer:
-      state = checkAnswer;
+      if(!answerArr[questionNum])
+      {
+        lcd.clear();
+        state = loser;
+      }
+      else if(answerArr[questionNum])
+      {
+        //answer correct
+        timerOn = true;
+        questionNum++;
+        state = gameplay;
+      }
+      else {
+        state = checkAnswer;
+      }
       break;
     default:
       state = gameStart;
@@ -530,10 +545,9 @@ void setup() {
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   // Print a message to the LCD.
-  lcd.write("testing");
   Serial.begin(9600);
   // samples of how to use EEPROM
-  //writeEEPROM(100, 35, EEPROM_I2C_ADDRESS);
+  //writeEEPROM(100, 0, EEPROM_I2C_ADDRESS);
   //Serial.println(readEEPROM(100, EEPROM_I2C_ADDRESS));
   
 }
