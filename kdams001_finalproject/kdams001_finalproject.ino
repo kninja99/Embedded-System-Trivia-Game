@@ -530,7 +530,8 @@ int TickFct_gameLoop(int state){
     case winner:
       if(i == 0)
       {
-        Serial.println("write to eeprom");
+        wins++;
+        writeEEPROM(100, wins, EEPROM_I2C_ADDRESS);
       }
       lcd.setCursor(0,0);
       lcd.write("WINNER!");
