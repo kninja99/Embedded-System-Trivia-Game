@@ -21,6 +21,7 @@ bool timerOn = false;
 int count = 0;
 bool buzzerOn = false;
 bool atMenu = true;
+bool blockCursor = false;
 String questionArr[] = {"5*4 = 20", "1270 % 3 = 0"};
 bool answerArr[] = {true, false};
 
@@ -264,7 +265,7 @@ int TickFct_update_cursor(int state){
     case updateCursorStart:
       break;
     case updateCursor:
-      if(joystickMovement == -1 && cursorPosition)
+      if(joystickMovement == -1 && !blockCursor)
       {
         lcd.setCursor(8,1);
         lcd.write(' ');
@@ -273,7 +274,7 @@ int TickFct_update_cursor(int state){
         lcd.setCursor(0,1);
         cursorPosition = false;
       }
-      else if(joystickMovement == 1 && !cursorPosition && !atMenu)
+      else if(joystickMovement == 1  && !atMenu && !blockCursor)
       {
         lcd.setCursor(0,1);
         lcd.write(' ');
@@ -403,6 +404,7 @@ int TickFct_gameLoop(int state){
       }
       else if(count > 10){
         timerOn = false;
+        blockCursor = true;
         state = loser;
         lcd.clear();
       }
@@ -424,6 +426,8 @@ int TickFct_gameLoop(int state){
         // reset cursor
         lcd.setCursor(0,1);
         lcd.write(">");
+        atMenu = true;
+        blockCursor = false;
         state = menu;
       }
       else {
