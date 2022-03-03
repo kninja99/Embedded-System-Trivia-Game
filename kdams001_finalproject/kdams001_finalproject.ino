@@ -401,9 +401,10 @@ int TickFct_gameLoop(int state){
     case gameplay:
       if(questionNum >= 2)
       {
-        Serial.println("winner");
         timerOn = false;
+        blockCursor = true;
         state = winner;
+        lcd.clear();
       }
       else if(!select && count < 10)
       {
@@ -463,7 +464,21 @@ int TickFct_gameLoop(int state){
       }
       break;
     case winner:
-      state = winner;
+      if(i < 30)
+      {
+        state = winner;
+      }
+      else if(i >= 30)
+      {
+        i = 0;
+        // reset cursor
+        lcd.setCursor(0,1);
+        lcd.write(">");
+        questionNum = 0;
+        atMenu = true;
+        blockCursor = false;
+        state = menu;
+      }
       break;
     default:
       state = gameStart;
@@ -511,10 +526,15 @@ int TickFct_gameLoop(int state){
       i++;
       break;
     case checkAnswer:
-      Serial.println("checking answer");
       break;
     case winner:
-      Serial.println("you have won, eeprom should increment by one");
+      if(i == 0)
+      {
+        Serial.println("write to eeprom");
+      }
+      lcd.setCursor(0,0);
+      lcd.write("WINNER!");
+      i++;
       break;
     default:
       break;
