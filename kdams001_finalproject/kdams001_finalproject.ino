@@ -19,6 +19,7 @@ bool select = false;
 bool cursorPosition = false;
 bool timerOn = false;
 int count = 0;
+bool buzzerOn = false;
 // EEPROM Helper Functions
 // reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
 
@@ -188,13 +189,32 @@ int TickFct_JoyStick(int state)
   // transitions
   switch(state){
     case bzrStart:
-      state = bzrOn;
-      break;
-    case bzrOn:
+      buzzerOn = false;
       state = bzrOff;
       break;
+    case bzrOn:
+      if(buzzerOn)
+      {
+        state = bzrOn;
+      }
+      else if(!buzzerOn){
+        state = bzrOff;
+      }
+      else {
+        state = bzrOn;
+      }
+      break;
     case bzrOff:
-      state = bzrOn;
+      if(buzzerOn)
+      {
+        state = bzrOn;
+      }
+      else if(!buzzerOn){
+        state = bzrOff;
+      }
+      else {
+        state = bzrOff;
+      }
       break;
     default:
       break;
@@ -204,11 +224,10 @@ int TickFct_JoyStick(int state)
     case bzrStart:
       break;
     case bzrOn:
-      //digitalWrite(buzzpin, HIGH);
-      //Serial.println(digitalRead(buzzpin));
+      digitalWrite(buzzpin, HIGH);
       break;
     case bzrOff:
-      //digitalWrite(buzzpin, LOW);
+      digitalWrite(buzzpin, LOW);
       break;
     default:
       break;
