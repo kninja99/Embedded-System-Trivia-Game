@@ -1,3 +1,21 @@
+/*         Your Name & E-mail: Kyle Damschen
+
+*          Lab Section: discusion 021  Tues. 11:00 - 11:50 am
+
+ *         Assignment: Custom Lab Project
+
+ *         Exercise Description: [optional - include for your own benefit]: This project is math based trivia game. Questions are simple for proof of concept
+
+ *        
+
+ *         I acknowledge all content contained herein, excluding template or example code, is my own original work.
+
+ *
+
+ *         Demo Link: <URL>
+
+ */
+
 #include <LiquidCrystal.h>
 #include <Wire.h>
 // initialize the library by associating any needed LCD interface pin
@@ -22,8 +40,8 @@ int count = 0;
 bool buzzerOn = false;
 bool atMenu = true;
 bool blockCursor = false;
-String questionArr[] = {"5*4 = 20", "1270 % 3 = 0", "7 + 4 = 12  ", "8 / 2 = 4 ", "25 % 5 = 0  "};
-bool answerArr[] = {true, false, false, true, true};
+String questionArr[] = {"5*4 = 20", "1270 % 3 = 0", "7 + 4 = 12  ", "8 / 2 = 4 ", "25 % 5 = 0" , "10+3 = 13   " , "2-2 = 0     ", "100 / 20 = 10 ", "12 * 5 = 60    ", "5 % 5 = 0        "};
+bool answerArr[] = {true, false, false, true, true,true,true, false, true, true};
 
 // EEPROM Helper Functions
 // reference video https://www.youtube.com/watch?v=ShqvATqXA7g&t=421s&ab_channel=DroneBotWorkshop
@@ -399,7 +417,7 @@ int TickFct_gameLoop(int state){
       }
       break;
     case gameplay:
-      if(questionNum >= 5)
+      if(questionNum >= 10)
       {
         timerOn = false;
         blockCursor = true;
@@ -499,7 +517,7 @@ int TickFct_gameLoop(int state){
       break;
     case gameplay:
     //display logic
-      if(questionNum < 5)
+      if(questionNum < 10)
       {
         lcd.setCursor(0,0);
         lcd.print(questionArr[questionNum]);
